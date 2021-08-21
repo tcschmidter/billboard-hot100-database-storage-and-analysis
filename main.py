@@ -33,29 +33,34 @@ def update():
         ending_date = datetime.today()
         # go through each week, if file does not exist, create it and fill it with data
         for week_date in get_weeks(starting_date, ending_date):
-            if not os.path.exists(DIRECTORY + "/" + week_date.strftime("%Y-%m-%d") + ".txt"):
+            if not os.path.exists(f"{DIRECTORY}/{week_date.strftime('%Y-%m-%d')}.txt"):
                 create_data_file(week_date.strftime("%Y-%m-%d"))
 
             # ************************
             # ************************
             # FIX: SOME FILES ARE EMPTY
+            # BELOW IS A TEMP CHECK AND FIX FOR EMPTY FILES
             # ************************
             # ************************
+            if os.stat(f"{DIRECTORY}/{week_date.strftime('%Y-%m-%d')}.txt").st_size == 0:
+                print("no file at ", f"{DIRECTORY}/{week_date.strftime('%Y-%m-%d')}.txt")
+                create_data_file(week_date.strftime("%Y-%m-%d"))
+
     print("Files updated.")
 
 def create_data_file(date_missing):
-    site = requests.get(f"{LINK}{date_missing}")
+    site = requests.get(f"{LINK}{date_missing}", allow_redirects=True)
     soup = BeautifulSoup(site.text, "html.parser")
 
     # finds all Hot 100 song names and puts them in a list
     songs = soup.find_all("span", class_="chart-element__information__song")
-    songs = soup.select("li button span span.chart-element__information__song.text--truncate.color--primary")
-    song_names = [song.getText() for song in songs]
+    ssongs = soup.select("li button span span.chart-element__information__song.text--truncate.color--primary")
+    song_names = [song.getText() for song in ssongs]
 
     # finds all Hot 100 artist names and puts them in a list
     artists = soup.find_all("span", class_="chart-element__information__artist")
-    artists = soup.select("li button span span.chart-element__information__artist.text--truncate.color--secondary")
-    artist_names = [artist.getText() for artist in artists]
+    sartists = soup.select("li button span span.chart-element__information__artist.text--truncate.color--secondary")
+    artist_names = [artist.getText() for artist in sartists]
 
     # puts the song names and artists names together in a tuple
     hot100 = [(song_names[i], artist_names[i]) for i in range(0, len(song_names))]
