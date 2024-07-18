@@ -1,2 +1,5 @@
 # Billboard Hot 100 Analyzer
-Analyzing trends in Billboard's Hot 100 over time using Python
+Scrapes the Billboard Hot 100 using Beautiful Soup and stores the data in txt files by year
+Analyzes trends in Hot 100 data
+
+by Thomas Clayton Schmidter
