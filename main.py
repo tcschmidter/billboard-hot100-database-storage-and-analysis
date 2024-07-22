@@ -7,7 +7,7 @@ from datetime import timedelta, datetime, date
 LINK = "https://www.billboard.com/charts/hot-100/"
 DIRECTORY = "./hot100-data"
 
-# date specifies the week of the billboard top 100
+# date specifies the week of the Billboard Hot 100
 # the first week of Billboard Hot 100 is the week of August 4th, 1958
 # if date is empty, the current week is accessed
 INITIAL_DATE = "1958-08-04"
@@ -17,6 +17,7 @@ CURRENT_DATE = ""
 def get_weeks(starting_date, ending_date):
     for n in range(0, int((ending_date - starting_date).days) + 1, 7):
         yield starting_date + timedelta(n)
+
 
 # checks for updates to ./hot100-data, and updates if necessary
 def update():
@@ -43,10 +44,11 @@ def update():
             # ************************
             # ************************
             if os.stat(f"{DIRECTORY}/{week_date.strftime('%Y-%m-%d')}.txt").st_size == 0:
-                print("no file at ", f"{DIRECTORY}/{week_date.strftime('%Y-%m-%d')}.txt")
+                print("No file at ", f"{DIRECTORY}/{week_date.strftime('%Y-%m-%d')}.txt")
                 create_data_file(week_date.strftime("%Y-%m-%d"))
 
     print("Files updated.")
+
 
 def create_data_file(date_missing):
     site = requests.get(f"{LINK}{date_missing}", allow_redirects=True)
@@ -67,6 +69,7 @@ def create_data_file(date_missing):
     with open(DIRECTORY + "/" + date_missing + ".txt", 'w') as fp:
         fp.write('\n'.join("{}\t{}".format(song[0], song[1]) for song in hot100))
     print("Added file: " + DIRECTORY + "/" + date_missing + ".txt")
+
 
 update()
 
