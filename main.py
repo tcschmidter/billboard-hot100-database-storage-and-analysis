@@ -13,7 +13,7 @@ def get_weeks(starting_date, ending_date):
         yield starting_date + timedelta(n)
 
 
-#creates the database and the table if it doesn't exist
+# creates the database and the table if it doesn't exist
 def create_database():
     conn = sqlite3.connect('billboard_hot100.db')
     c = conn.cursor()
