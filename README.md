@@ -6,7 +6,7 @@ by Thomas Clayton Schmidter
 - Analyzes various trends in the Billboard Hot 100
 
 ## Files
-### main.py
+### update.py
 Scrapes data and updates the database
 ### billboard_hot100.db
 Stores Date,Rank,Song,Artist of the Hot 100 songs for each week starting from 1958
