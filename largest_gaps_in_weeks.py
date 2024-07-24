@@ -2,11 +2,10 @@ import sqlite3
 import pandas as pd
 import plotly.graph_objects as go
 
-
 def largest_gaps_chart():
     conn = sqlite3.connect('billboard_hot100.db')
 
-    # query to find song appearances and calculate gaps in weeks
+    # query to find song appearances and calculate gaps in days
     query = '''
     WITH appearances AS (
         SELECT song, artist, date
@@ -19,7 +18,7 @@ def largest_gaps_chart():
             a.artist,
             a.date AS start_date,
             MIN(b.date) AS end_date,
-            ROUND((JULIANDAY(MIN(b.date)) - JULIANDAY(a.date)) / 7.0) AS gap_weeks
+            JULIANDAY(MIN(b.date)) - JULIANDAY(a.date) AS gap_days
         FROM appearances a
         LEFT JOIN appearances b
             ON a.song = b.song
@@ -27,12 +26,12 @@ def largest_gaps_chart():
             AND b.date > a.date
         WHERE a.date < b.date
         GROUP BY a.song, a.artist, a.date
-        HAVING gap_weeks IS NOT NULL
-        ORDER BY gap_weeks DESC
+        HAVING gap_days IS NOT NULL
+        ORDER BY gap_days DESC
     )
-    SELECT song, artist, start_date AS first_missing_date, end_date AS last_seen_date, gap_weeks
+    SELECT song, artist, start_date AS first_missing_date, end_date AS last_seen_date, gap_days
     FROM gaps
-    ORDER BY gap_weeks DESC
+    ORDER BY gap_days DESC
     LIMIT 10;
     '''
     df = pd.read_sql_query(query, conn)
@@ -45,22 +44,22 @@ def largest_gaps_chart():
     # creates a bar chart with gap information
     fig = go.Figure()
 
-    # sorts by gap_weeks from largest to smallest
-    df = df.sort_values(by='gap_weeks', ascending=False)
+    # sorts by gap_days from largest to smallest
+    df = df.sort_values(by='gap_days', ascending=False)
 
     for i, row in df.iterrows():
         fig.add_trace(go.Bar(
-            x=[row['gap_weeks']],
+            x=[row['gap_days']],
             y=[f"{row['song']} ({row['artist']})"],
             orientation='h',
             marker=dict(color='lightblue', line=dict(color='black', width=2)),
-            text=[f"Gap of {int(row['gap_weeks'])} weeks"],
+            text=[f"Gap of {int(row['gap_days'])} days"],
             textposition='inside',
             textfont=dict(color='black'),
             customdata=[(row['first_missing_date'].strftime('%Y-%m-%d'), row['last_seen_date'].strftime('%Y-%m-%d'))],
             hovertemplate=(
                 "<b>%{y}</b><br>"
-                "Gap of %{x} weeks<br>"
+                "Gap of %{x} days<br>"
                 "Start: %{customdata[0]}<br>"
                 "End: %{customdata[1]}<extra></extra>"
             )
@@ -68,7 +67,7 @@ def largest_gaps_chart():
 
         # adds annotations for start and end dates
         fig.add_annotation(
-            x=row['gap_weeks'] + 1,  # positions to the right of the bar
+            x=row['gap_days'] + 1,  # positions to the right of the bar
             y=f"{row['song']} ({row['artist']})",
             text=f"Start: {row['first_missing_date'].strftime('%Y-%m-%d')}<br>End: {row['last_seen_date'].strftime('%Y-%m-%d')}",
             showarrow=False,
@@ -82,7 +81,7 @@ def largest_gaps_chart():
         title_text="Top 10 Largest Gaps Between Appearances on the Hot 100",
         title_x=0.5,
         title_y=0.95,
-        xaxis_title="Weeks",
+        xaxis_title="Days",
         yaxis_title="Song and Artist",
         height=600,
         margin=dict(l=350, r=50, t=50, b=0),  # adjusts margins to fit text
