@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 def largest_gaps_chart():
     conn = sqlite3.connect('billboard_hot100.db')
 
-    # query to find song appearances and calculate gaps in days
+    # query to find song appearances and calculate length of gaps
     query = '''
     WITH appearances AS (
         SELECT song, artist, date
